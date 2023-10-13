@@ -32,8 +32,7 @@ import me.dio.copa.catar.domain.model.MatchDomain
 import me.dio.copa.catar.domain.model.TeamDomain
 import me.dio.copa.catar.ui.theme.Shapes
 
-typealias NotificationOnClick = (match: MatchDomain) -> Unit
-
+typealias NotificationOnClick = (match : MatchDomain) -> Unit
 @Composable
 fun MainScreen(matches: List<MatchDomain>, onNotificationClick: NotificationOnClick) {
     Box(
@@ -43,7 +42,7 @@ fun MainScreen(matches: List<MatchDomain>, onNotificationClick: NotificationOnCl
     ) {
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(matches) { match ->
-                MatchInfo(match, onNotificationClick)
+                MatchInfo(match, onNotificationClick )
             }
         }
     }
@@ -62,11 +61,11 @@ fun MatchInfo(match: MatchDomain, onNotificationClick: NotificationOnClick) {
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.height(160.dp)
             )
-
             Column(modifier = Modifier.padding(16.dp)) {
                 Notification(match, onNotificationClick)
                 Title(match)
                 Teams(match)
+
             }
         }
     }
@@ -74,22 +73,29 @@ fun MatchInfo(match: MatchDomain, onNotificationClick: NotificationOnClick) {
 
 @Composable
 fun Notification(match: MatchDomain, onClick: NotificationOnClick) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.End
+    ) {
+
         val drawable = if (match.notificationEnabled) R.drawable.ic_notifications_active
         else R.drawable.ic_notifications
 
         Image(
-            painter = painterResource(id = drawable),
             modifier = Modifier.clickable {
                 onClick(match)
             },
+            painter = painterResource(id = drawable),
             contentDescription = null
         )
     }
 }
 
+
+
 @Composable
 fun Title(match: MatchDomain) {
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center
@@ -103,19 +109,18 @@ fun Title(match: MatchDomain) {
 
 @Composable
 fun Teams(match: MatchDomain) {
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         TeamItem(team = match.team1)
-
         Text(
             text = "X",
             modifier = Modifier.padding(end = 16.dp, start = 16.dp),
             style = MaterialTheme.typography.h6.copy(color = Color.White)
         )
-
         TeamItem(team = match.team2)
     }
 }
@@ -128,13 +133,12 @@ fun TeamItem(team: TeamDomain) {
             modifier = Modifier.align(Alignment.CenterVertically),
             style = MaterialTheme.typography.h3.copy(color = Color.White)
         )
-
         Spacer(modifier = Modifier.size(16.dp))
-
         Text(
             text = team.displayName,
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.h6.copy(color = Color.White)
         )
     }
+
 }

@@ -1,5 +1,6 @@
 package me.dio.copa.catar.features
 
+
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -9,36 +10,38 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.dio.copa.catar.core.BaseViewModel
 import me.dio.copa.catar.domain.model.Match
-import me.dio.copa.catar.domain.model.MatchDomain
 import me.dio.copa.catar.domain.usecase.DisableNotificationUseCase
 import me.dio.copa.catar.domain.usecase.EnableNotificationUseCase
-import me.dio.copa.catar.domain.usecase.GetMatchesUseCase
+import me.dio.copa.catar.domain.usecase.GetMatchesUseCases
 import me.dio.copa.catar.remote.NotFoundException
 import me.dio.copa.catar.remote.UnexpectedException
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val getMatchesUseCase: GetMatchesUseCase,
-    private val disableNotificationUseCase: DisableNotificationUseCase,
+    private val getMatchesUseCases: GetMatchesUseCases,
     private val enableNotificationUseCase: EnableNotificationUseCase,
+    private val disableNotificationUseCase: DisableNotificationUseCase,
 ) : BaseViewModel<MainUiState, MainUiAction>(MainUiState()) {
-
     init {
         fetchMatches()
     }
 
     private fun fetchMatches() = viewModelScope.launch {
-        getMatchesUseCase()
+        getMatchesUseCases()
             .flowOn(Dispatchers.Main)
             .catch {
-                when(it) {
-                    is NotFoundException ->
-                        sendAction(MainUiAction.MatchesNotFound(it.message ?: "Erro sem mensagem"))
-                    is UnexpectedException ->
-                        sendAction(MainUiAction.Unexpected)
+                when (it) {
+                    is NotFoundException -> sendAction(
+                        MainUiAction.MatchesNotFound(
+                            it.message ?: "Erro sem mensagem"
+                        )
+                    )
+
+                    is UnexpectedException -> sendAction(MainUiAction.Unexpected)
                 }
-            }.collect { matches ->
+            }
+            .collect { matches ->
                 setState {
                     copy(matches = matches)
                 }
@@ -56,21 +59,22 @@ class MainViewModel @Inject constructor(
                         enableNotificationUseCase(match.id)
                         MainUiAction.EnableNotification(match)
                     }
-
                     sendAction(action)
                 }
             }
+
+
         }
     }
 }
 
 data class MainUiState(
-    val matches: List<MatchDomain> = emptyList()
+    val matches: List<Match> = emptyList(),
 )
 
-sealed interface MainUiAction {
-    object Unexpected: MainUiAction
-    data class MatchesNotFound(val message: String) : MainUiAction
-    data class EnableNotification(val match: MatchDomain) : MainUiAction
-    data class DisableNotification(val match: MatchDomain) : MainUiAction
+sealed class MainUiAction {
+    data class MatchesNotFound(val message: String) : MainUiAction()
+    data class EnableNotification(val match: Match) : MainUiAction()
+    data class DisableNotification(val match: Match) : MainUiAction()
+    object Unexpected : MainUiAction()
 }
